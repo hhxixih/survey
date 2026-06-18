@@ -222,7 +222,7 @@
 
 <div class="header">
   <h1>2026夏季期末展展品信息收集</h1>
-  <p>请如实填写以下信息，感谢配合</p>
+  <p>请填写以下信息</p>
 </div>
 
 <!-- netlify 属性让 Netlify 自动识别并收集这个表单 -->
@@ -244,7 +244,7 @@
       <div class="field-label">
         <span class="required">*</span> 展签
       </div>
-      <textarea name="展签" id="exhibitionSign" placeholder="请输入展品名称及介绍" style="min-height:140px;"></textarea>
+      <textarea name="展签" id="exhibitionSign" placeholder="" style="min-height:140px;"></textarea>
     </div>
 
     <!-- 展览形式 -->
@@ -273,7 +273,7 @@
         <input type="file" name="图片" accept="image/*" multiple id="imageInput" onchange="handleImages(this)">
         <div class="upload-icon">🖼️</div>
         <div class="upload-text">点击上传图片</div>
-        <div class="upload-hint">支持 JPG / PNG，最多 10 张</div>
+        <div class="upload-hint">最多 10 张</div>
       </div>
       <div class="preview-grid" id="previewGrid"></div>
     </div>
@@ -281,13 +281,19 @@
     <!-- 作品尺寸 -->
     <div class="field-group">
       <div class="field-label">作品尺寸</div>
-      <textarea name="作品尺寸" placeholder="请填写作品尺寸，例如：&#10;· 长×宽×高：120cm × 80cm × 5cm&#10;· 电子屏幕：55寸"></textarea>
+      <textarea name="作品尺寸" placeholder=""></textarea>
+    </div>
+
+    <!-- 备注 -->
+    <div class="field-group">
+      <div class="field-label">备注</div>
+      <textarea name="备注" placeholder=""></textarea>
     </div>
 
     <button type="submit" class="submit-btn" onclick="return validateForm()">提 交</button>
   </div>
 
-  <div class="footer">填写遇到问题请联系主办方</div>
+  <div class="footer"></div>
 </form>
 
 <div class="error-toast" id="errorToast"></div>
