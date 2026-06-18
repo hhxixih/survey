@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>展览信息收集</title>
+  <title>2026夏季期末展展品信息收集</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -221,7 +221,7 @@
 <body>
 
 <div class="header">
-  <h1>展览信息收集</h1>
+  <h1>2026夏季期末展展品信息收集</h1>
   <p>请如实填写以下信息，感谢配合</p>
 </div>
 
@@ -244,8 +244,7 @@
       <div class="field-label">
         <span class="required">*</span> 展签
       </div>
-      <input type="text" name="展签" id="exhibitionSign" placeholder="请输入展签名称" maxlength="100">
-      <div class="field-hint">例如：2024年春季艺术展</div>
+      <textarea name="展签" id="exhibitionSign" placeholder="请输入展品名称及介绍" style="min-height:140px;"></textarea>
     </div>
 
     <!-- 展览形式 -->
@@ -264,11 +263,6 @@
           <div class="radio-dot"></div>
           <span class="radio-text">线下展览</span>
         </label>
-        <label class="radio-item" onclick="selectRadio(this)">
-          <input type="radio" name="展览形式" value="线上+线下">
-          <div class="radio-dot"></div>
-          <span class="radio-text">线上 + 线下（双渠道）</span>
-        </label>
       </div>
     </div>
 
@@ -284,10 +278,10 @@
       <div class="preview-grid" id="previewGrid"></div>
     </div>
 
-    <!-- 需要的资源 -->
+    <!-- 作品尺寸 -->
     <div class="field-group">
-      <div class="field-label">需要的资源</div>
-      <textarea name="需要的资源" placeholder="请描述您需要的资源，例如：&#10;· 场地：500㎡展厅&#10;· 设备：LED屏幕×2、音响&#10;· 人员：布展人员3名"></textarea>
+      <div class="field-label">作品尺寸</div>
+      <textarea name="作品尺寸" placeholder="请填写作品尺寸，例如：&#10;· 长×宽×高：120cm × 80cm × 5cm&#10;· 电子屏幕：55寸"></textarea>
     </div>
 
     <button type="submit" class="submit-btn" onclick="return validateForm()">提 交</button>
@@ -330,6 +324,7 @@
 
   function validateForm() {
     const sign = document.getElementById('exhibitionSign').value.trim();
+
     const typeChecked = document.querySelector('input[name="展览形式"]:checked');
 
     if (!sign) { showToast('请填写展签名称'); return false; }
