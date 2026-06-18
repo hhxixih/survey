@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>展览信息收集</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1a73e8, #0d47a1);
+      color: white;
+      padding: 28px 20px 24px;
+      text-align: center;
+    }
+
+    .header h1 { font-size: 20px; font-weight: 600; letter-spacing: 1px; }
+    .header p { font-size: 13px; opacity: 0.85; margin-top: 6px; }
+
+    .form-card {
+      background: white;
+      margin: 16px;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .field-group { margin-bottom: 24px; }
+
+    .field-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: #222;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .required { color: #e53935; font-size: 16px; line-height: 1; }
+    .field-hint { font-size: 12px; color: #999; margin-top: 4px; }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 15px;
+      color: #333;
+      background: #fafafa;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: #1a73e8;
+      background: white;
+    }
+
+    textarea { min-height: 100px; resize: vertical; line-height: 1.6; }
+
+    .radio-group { display: flex; flex-direction: column; gap: 10px; }
+
+    .radio-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #fafafa;
+    }
+
+    .radio-item.selected {
+      border-color: #1a73e8;
+      background: #e8f0fe;
+    }
+
+    .radio-item input[type="radio"] { display: none; }
+
+    .radio-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid #bbb;
+      margin-right: 12px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .radio-item.selected .radio-dot {
+      border-color: #1a73e8;
+      background: #1a73e8;
+    }
+
+    .radio-dot::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: white;
+      display: none;
+    }
+
+    .radio-item.selected .radio-dot::after { display: block; }
+
+    .radio-text { font-size: 15px; color: #333; }
+    .radio-item.selected .radio-text { color: #1a73e8; font-weight: 500; }
+
+    .upload-area {
+      border: 2px dashed #d0d0d0;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      background: #fafafa;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .upload-area input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .upload-icon { font-size: 36px; margin-bottom: 8px; }
+    .upload-text { font-size: 14px; color: #666; }
+    .upload-hint { font-size: 12px; color: #aaa; margin-top: 4px; }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .preview-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+
+    .preview-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 22px;
+      height: 22px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 50%;
+      color: white;
+      font-size: 14px;
+      line-height: 22px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #1a73e8, #0d47a1);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      cursor: pointer;
+      margin-top: 4px;
+      -webkit-appearance: none;
+      transition: opacity 0.2s;
+    }
+
+    .submit-btn:active { opacity: 0.85; }
+    .submit-btn:disabled { background: #bbb; }
+
+    .error-toast {
+      display: none;
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      z-index: 200;
+      white-space: nowrap;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: #bbb;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>展览信息收集</h1>
+  <p>请如实填写以下信息，感谢配合</p>
+</div>
+
+<!-- netlify 属性让 Netlify 自动识别并收集这个表单 -->
+<form
+  name="exhibition-survey"
+  method="POST"
+  enctype="multipart/form-data"
+  data-netlify="true"
+  action="/success.html"
+  id="surveyForm"
+>
+  <!-- Netlify 必须的隐藏字段 -->
+  <input type="hidden" name="form-name" value="exhibition-survey">
+
+  <div class="form-card">
+
+    <!-- 展签 -->
+    <div class="field-group">
+      <div class="field-label">
+        <span class="required">*</span> 展签
+      </div>
+      <input type="text" name="展签" id="exhibitionSign" placeholder="请输入展签名称" maxlength="100">
+      <div class="field-hint">例如：2024年春季艺术展</div>
+    </div>
+
+    <!-- 展览形式 -->
+    <div class="field-group">
+      <div class="field-label">
+        <span class="required">*</span> 展览形式
+      </div>
+      <div class="radio-group">
+        <label class="radio-item" onclick="selectRadio(this)">
+          <input type="radio" name="展览形式" value="线上">
+          <div class="radio-dot"></div>
+          <span class="radio-text">线上展览</span>
+        </label>
+        <label class="radio-item" onclick="selectRadio(this)">
+          <input type="radio" name="展览形式" value="线下">
+          <div class="radio-dot"></div>
+          <span class="radio-text">线下展览</span>
+        </label>
+        <label class="radio-item" onclick="selectRadio(this)">
+          <input type="radio" name="展览形式" value="线上+线下">
+          <div class="radio-dot"></div>
+          <span class="radio-text">线上 + 线下（双渠道）</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- 图片上传 -->
+    <div class="field-group">
+      <div class="field-label">相关图片</div>
+      <div class="upload-area">
+        <input type="file" name="图片" accept="image/*" multiple id="imageInput" onchange="handleImages(this)">
+        <div class="upload-icon">🖼️</div>
+        <div class="upload-text">点击上传图片</div>
+        <div class="upload-hint">支持 JPG / PNG，最多 10 张</div>
+      </div>
+      <div class="preview-grid" id="previewGrid"></div>
+    </div>
+
+    <!-- 需要的资源 -->
+    <div class="field-group">
+      <div class="field-label">需要的资源</div>
+      <textarea name="需要的资源" placeholder="请描述您需要的资源，例如：&#10;· 场地：500㎡展厅&#10;· 设备：LED屏幕×2、音响&#10;· 人员：布展人员3名"></textarea>
+    </div>
+
+    <button type="submit" class="submit-btn" onclick="return validateForm()">提 交</button>
+  </div>
+
+  <div class="footer">填写遇到问题请联系主办方</div>
+</form>
+
+<div class="error-toast" id="errorToast"></div>
+
+<script>
+  function selectRadio(label) {
+    document.querySelectorAll('.radio-item').forEach(el => el.classList.remove('selected'));
+    label.classList.add('selected');
+    label.querySelector('input[type="radio"]').checked = true;
+  }
+
+  function handleImages(input) {
+    const files = Array.from(input.files);
+    const grid = document.getElementById('previewGrid');
+    grid.innerHTML = '';
+
+    if (files.length > 10) {
+      showToast('最多上传 10 张图片');
+      input.value = '';
+      return;
+    }
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const item = document.createElement('div');
+        item.className = 'preview-item';
+        item.innerHTML = `<img src="${e.target.result}" alt="预览图">`;
+        grid.appendChild(item);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function validateForm() {
+    const sign = document.getElementById('exhibitionSign').value.trim();
+    const typeChecked = document.querySelector('input[name="展览形式"]:checked');
+
+    if (!sign) { showToast('请填写展签名称'); return false; }
+    if (!typeChecked) { showToast('请选择展览形式'); return false; }
+    return true;
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('errorToast');
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 2500);
+  }
+</script>
+</body>
+</html>
