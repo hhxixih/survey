@@ -45,7 +45,6 @@
     }
 
     .required { color: #e53935; font-size: 16px; line-height: 1; }
-    .field-hint { font-size: 12px; color: #999; margin-top: 4px; }
 
     input[type="text"],
     textarea {
@@ -102,10 +101,7 @@
       transition: all 0.2s;
     }
 
-    .radio-item.selected .radio-dot {
-      border-color: #1a73e8;
-      background: #1a73e8;
-    }
+    .radio-item.selected .radio-dot { border-color: #1a73e8; background: #1a73e8; }
 
     .radio-dot::after {
       content: '';
@@ -117,10 +113,84 @@
     }
 
     .radio-item.selected .radio-dot::after { display: block; }
-
     .radio-text { font-size: 15px; color: #333; }
     .radio-item.selected .radio-text { color: #1a73e8; font-weight: 500; }
 
+    /* 图片上传 */
+    .upload-area {
+      border: 2px dashed #d0d0d0;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      background: #fafafa;
+      position: relative;
+    }
+
+    .upload-area input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .upload-icon { font-size: 36px; margin-bottom: 8px; }
+    .upload-text { font-size: 14px; color: #666; }
+    .upload-hint { font-size: 12px; color: #aaa; margin-top: 4px; }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .preview-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #eee;
+    }
+
+    .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+
+    .preview-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 22px;
+      height: 22px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 50%;
+      color: white;
+      font-size: 14px;
+      line-height: 22px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .uploading-mask {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mini-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .submit-btn {
       width: 100%;
@@ -156,12 +226,7 @@
       white-space: nowrap;
     }
 
-    .footer {
-      text-align: center;
-      padding: 20px;
-      font-size: 12px;
-      color: #bbb;
-    }
+    .footer { text-align: center; padding: 20px; font-size: 12px; color: #bbb; }
   </style>
 </head>
 <body>
@@ -171,33 +236,29 @@
   <p>请填写以下信息</p>
 </div>
 
-<!-- netlify 属性让 Netlify 自动识别并收集这个表单 -->
 <form
   name="exhibition-survey"
   method="POST"
-  enctype="multipart/form-data"
   data-netlify="true"
   action="/success.html"
   id="surveyForm"
+  onsubmit="return handleSubmit(event)"
 >
-  <!-- Netlify 必须的隐藏字段 -->
   <input type="hidden" name="form-name" value="exhibition-survey">
+  <!-- 图片链接由 JS 填入 -->
+  <input type="hidden" name="图片" id="imageUrlsField">
 
   <div class="form-card">
 
     <!-- 展签 -->
     <div class="field-group">
-      <div class="field-label">
-        <span class="required">*</span> 展签
-      </div>
-      <textarea name="展签" id="exhibitionSign" placeholder="" style="min-height:140px;"></textarea>
+      <div class="field-label"><span class="required">*</span> 展签</div>
+      <textarea name="展签" id="exhibitionSign" style="min-height:140px;"></textarea>
     </div>
 
     <!-- 展览形式 -->
     <div class="field-group">
-      <div class="field-label">
-        <span class="required">*</span> 展览形式
-      </div>
+      <div class="field-label"><span class="required">*</span> 展览形式</div>
       <div class="radio-group">
         <label class="radio-item" onclick="selectRadio(this)">
           <input type="radio" name="展览形式" value="线上">
@@ -212,20 +273,31 @@
       </div>
     </div>
 
+    <!-- 图片上传 -->
+    <div class="field-group">
+      <div class="field-label">相关图片</div>
+      <div class="upload-area">
+        <input type="file" accept="image/*" multiple id="imageInput" onchange="handleImages(this)">
+        <div class="upload-icon">🖼️</div>
+        <div class="upload-text">点击从相册选择图片</div>
+        <div class="upload-hint">最多 10 张</div>
+      </div>
+      <div class="preview-grid" id="previewGrid"></div>
+    </div>
 
-<!-- 作品尺寸 -->
+    <!-- 作品尺寸 -->
     <div class="field-group">
       <div class="field-label">作品尺寸</div>
-      <textarea name="作品尺寸" placeholder=""></textarea>
+      <textarea name="作品尺寸"></textarea>
     </div>
 
     <!-- 备注 -->
     <div class="field-group">
       <div class="field-label">备注</div>
-      <textarea name="备注" placeholder=""></textarea>
+      <textarea name="备注" placeholder="需要的资源"></textarea>
     </div>
 
-    <button type="submit" class="submit-btn" onclick="return validateForm()">提 交</button>
+    <button type="submit" class="submit-btn" id="submitBtn">提 交</button>
   </div>
 
   <div class="footer"></div>
@@ -234,21 +306,125 @@
 <div class="error-toast" id="errorToast"></div>
 
 <script>
+  const CLOUD_NAME = 'dajseheg8';
+  const UPLOAD_PRESET = '展签信息收集1';
+
+  let selectedFiles = [];
+  let uploadedUrls = {};  // index -> url
+  let uploading = 0;
+
   function selectRadio(label) {
     document.querySelectorAll('.radio-item').forEach(el => el.classList.remove('selected'));
     label.classList.add('selected');
     label.querySelector('input[type="radio"]').checked = true;
   }
 
+  function handleImages(input) {
+    const files = Array.from(input.files);
+    if (selectedFiles.length + files.length > 10) {
+      showToast('最多上传 10 张图片');
+      input.value = '';
+      return;
+    }
 
-  function validateForm() {
+    files.forEach(file => {
+      const index = selectedFiles.length;
+      selectedFiles.push(file);
+      addPreviewAndUpload(file, index);
+    });
+
+    input.value = '';
+  }
+
+  function addPreviewAndUpload(file, index) {
+    const grid = document.getElementById('previewGrid');
+    const item = document.createElement('div');
+    item.className = 'preview-item';
+    item.id = `preview-${index}`;
+    item.innerHTML = `
+      <img id="img-${index}" src="">
+      <div class="uploading-mask" id="mask-${index}"><div class="mini-spinner"></div></div>
+    `;
+    grid.appendChild(item);
+
+    // 本地预览
+    const reader = new FileReader();
+    reader.onload = e => { document.getElementById(`img-${index}`).src = e.target.result; };
+    reader.readAsDataURL(file);
+
+    // 上传到 Cloudinary
+    uploading++;
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', UPLOAD_PRESET);
+
+    fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+      method: 'POST',
+      body: fd
+    })
+    .then(r => r.json())
+    .then(data => {
+      uploadedUrls[index] = data.secure_url;
+      const mask = document.getElementById(`mask-${index}`);
+      if (mask) mask.remove();
+
+      // 加删除按钮
+      const item = document.getElementById(`preview-${index}`);
+      if (item) {
+        const btn = document.createElement('div');
+        btn.className = 'preview-remove';
+        btn.textContent = '×';
+        btn.onclick = () => removeImage(index);
+        item.appendChild(btn);
+      }
+    })
+    .catch(() => {
+      showToast('有图片上传失败，请重试');
+      const item = document.getElementById(`preview-${index}`);
+      if (item) item.remove();
+      delete uploadedUrls[index];
+    })
+    .finally(() => { uploading--; });
+  }
+
+  function removeImage(index) {
+    delete uploadedUrls[index];
+    selectedFiles[index] = null;
+    const item = document.getElementById(`preview-${index}`);
+    if (item) item.remove();
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
     const sign = document.getElementById('exhibitionSign').value.trim();
-
     const typeChecked = document.querySelector('input[name="展览形式"]:checked');
 
-    if (!sign) { showToast('请填写展签名称'); return false; }
+    if (!sign) { showToast('请填写展签内容'); return false; }
     if (!typeChecked) { showToast('请选择展览形式'); return false; }
-    return true;
+    if (uploading > 0) { showToast('图片还在上传中，请稍候'); return false; }
+
+    // 把图片链接写入隐藏字段
+    const urls = Object.values(uploadedUrls).filter(Boolean);
+    document.getElementById('imageUrlsField').value = urls.join('\n');
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '提交中…';
+
+    // 提交表单
+    const formData = new FormData(document.getElementById('surveyForm'));
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(formData).toString()
+    })
+    .then(() => { window.location.href = '/success.html'; })
+    .catch(() => {
+      showToast('提交失败，请重试');
+      btn.disabled = false;
+      btn.textContent = '提 交';
+    });
   }
 
   function showToast(msg) {
